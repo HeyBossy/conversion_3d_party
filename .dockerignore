@@ -1,0 +1,5 @@
+venv
+.venv
+.idea
+data/private_info/train*
+data/private_info/third_party_conversions.parquet

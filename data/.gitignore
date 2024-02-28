@@ -1,0 +1,5 @@
+train/*
+test/*
+private_info/*
+!private_info/.gitkeep
+submission.csv
