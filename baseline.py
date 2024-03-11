@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import catboost as cb
+from features.transforms import FeatureTransformer
 
 
 #######################
@@ -17,9 +18,9 @@ MODEL_PATH = 'trained_model.cb'
 
 def run():
     # Some datasets are quite big. All together they take ~ 15Gb RAM
-    train_views = pd.read_parquet(VIEWS_PATH)[:500000]
+    train_views = pd.read_parquet(VIEWS_PATH)
     train_actions = pd.read_parquet(ACTIONS_PATH)
-    # third_party_conv = pd.read_parquet(THIRD_PARTY_PATH)
+    third_party_conv = pd.read_parquet(THIRD_PARTY_PATH)
 
     # Construct dataset.
     # In this simple solution we just merge views and target post-click conversions.
@@ -35,10 +36,15 @@ def run():
     df.drop('is_post_click', inplace=True, axis=1)
 
     split_date = '2024-01-17'
-    X_train = df[(df.time < split_date)].drop(['time', 'label'], axis=1)
+    X_train = df[(df.time < split_date)]
     y_train = df.label[(df.time < split_date)]
-    X_test = df[(df.time > split_date)].drop(['time', 'label'], axis=1)
-    y_test = df.label[(df.time > split_date)]
+    X_test = df[(df.time >= split_date)]
+    y_test = df.label[(df.time >= split_date)]
+
+    feature_transformer = FeatureTransformer()
+    feature_transformer.fit(X_train)
+    X_train = feature_transformer.transform(X_train)
+    X_test = feature_transformer.transform(X_test)
 
     cat_features = list(X_train.columns[X_train.dtypes == 'object'])
     num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
