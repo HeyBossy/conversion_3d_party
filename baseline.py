@@ -3,7 +3,6 @@ import pandas as pd
 import catboost as cb
 from features.transforms import FeatureTransformer
 
-
 #######################
 #
 # This is a (very) simple solution to the classification problem of
@@ -16,11 +15,12 @@ ACTIONS_PATH = './data/private_info/train_actions.parquet'
 THIRD_PARTY_PATH = './data/private_info/third_party_conversions.parquet'
 MODEL_PATH = 'trained_model.cb'
 
+
 def run():
     # Some datasets are quite big. All together they take ~ 15Gb RAM
     train_views = pd.read_parquet(VIEWS_PATH)
     train_actions = pd.read_parquet(ACTIONS_PATH)
-    third_party_conv = pd.read_parquet(THIRD_PARTY_PATH)
+    # third_party_conv = pd.read_parquet(THIRD_PARTY_PATH)
 
     # Construct dataset.
     # In this simple solution we just merge views and target post-click conversions.
@@ -61,6 +61,7 @@ def run():
     print("Save model..")
     cb_clf.save_model(MODEL_PATH)
     return predictions
+
 
 def make_pedictions(test_df_path):
     val_df = pd.read_parquet(test_df_path)
