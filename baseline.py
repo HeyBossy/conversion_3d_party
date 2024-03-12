@@ -64,7 +64,7 @@ def run():
 
 def make_pedictions(test_df_path):
     val_df = pd.read_parquet(test_df_path)
-    val_df.transform(val_df)
+    val_df = feature_transformer.transform(val_df)
     cat_features = list(val_df.columns[val_df.dtypes == 'object'])
     num_features = list(val_df.columns[~(val_df.dtypes == 'object')])
     val_df = pd.concat((val_df[cat_features].fillna('-1'), val_df[num_features].fillna(-1)), axis=1)

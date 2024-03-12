@@ -25,6 +25,14 @@ class FeatureTransformer:
         df[time_col] = pd.to_datetime(df[time_col])
         df['processed_hour_of_day'] = df[time_col].dt.hour
         df['processed_day_of_week'] = df[time_col].dt.weekday
+
+        df['processed_period'] = (df[time_col].dt.hour % 24 + 4) // 4
+        df['processed_period'].replace({1: 'Late Night',
+                              2: 'Early Morning',
+                              3: 'Morning',
+                              4: 'Noon',
+                              5: 'Evening',
+                              6: 'Night'}, inplace=True)
         df = df.drop([time_col], axis=1)
         return df
 
