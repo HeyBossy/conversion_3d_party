@@ -36,9 +36,9 @@ def run():
     df.drop('is_post_click', inplace=True, axis=1)
 
     split_date = '2024-01-17'
-    X_train = df[(df.time < split_date)]
+    X_train = df[(df.time < split_date)].drop(['label'], axis=1)
     y_train = df.label[(df.time < split_date)]
-    X_test = df[(df.time >= split_date)]
+    X_test = df[(df.time >= split_date)].drop(['label'], axis=1)
     y_test = df.label[(df.time >= split_date)]
 
     feature_transformer.fit(X_train)
