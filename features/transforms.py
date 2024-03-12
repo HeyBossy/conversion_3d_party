@@ -19,6 +19,7 @@ class FeatureTransformer:
         df[time_col] = pd.to_datetime(df[time_col])
         df['processed_hour_of_day'] = df[time_col].dt.hour
         df['processed_day_of_week'] = df[time_col].dt.weekday
+        df = df.drop([time_col], axis=1)
         return df
 
     def _replace_browser(self, df, ua_browser_col):
@@ -30,6 +31,8 @@ class FeatureTransformer:
             return browser
 
         df["processed_ua_browser"] = df[ua_browser_col].apply(__replace)
+        df = df.drop([ua_browser_col], axis=1)
+
         return df
 
     def _replace_page_lang(self, df, lang):
@@ -41,6 +44,9 @@ class FeatureTransformer:
             return lang
 
         df["processed_page_language"] = df[lang].apply(__replace)
+        df = df.drop([lang], axis=1)
+
+        return df
 
     def _create_data_by_zipcode(self, df, zipcode):
         mapping_json_path = 'data/zipcode_to_data.json'

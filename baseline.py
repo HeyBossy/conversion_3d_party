@@ -15,6 +15,7 @@ ACTIONS_PATH = './data/private_info/train_actions.parquet'
 THIRD_PARTY_PATH = './data/private_info/third_party_conversions.parquet'
 MODEL_PATH = 'trained_model.cb'
 
+feature_transformer = FeatureTransformer()
 
 def run():
     # Some datasets are quite big. All together they take ~ 15Gb RAM
@@ -41,7 +42,6 @@ def run():
     X_test = df[(df.time >= split_date)]
     y_test = df.label[(df.time >= split_date)]
 
-    feature_transformer = FeatureTransformer()
     feature_transformer.fit(X_train)
     X_train = feature_transformer.transform(X_train)
     X_test = feature_transformer.transform(X_test)
@@ -52,7 +52,7 @@ def run():
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-    cb_clf = cb.CatBoostClassifier(iterations=100, cat_features=cat_features, eval_metric="AUC",
+    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
                                    early_stopping_rounds=20)
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
@@ -65,7 +65,7 @@ def run():
 
 def make_pedictions(test_df_path):
     val_df = pd.read_parquet(test_df_path)
-    val_df.drop('time', inplace=True, axis=1)
+    val_df.transform(val_df)
     cat_features = list(val_df.columns[val_df.dtypes == 'object'])
     num_features = list(val_df.columns[~(val_df.dtypes == 'object')])
     val_df = pd.concat((val_df[cat_features].fillna('-1'), val_df[num_features].fillna(-1)), axis=1)
