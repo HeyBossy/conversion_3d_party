@@ -18,7 +18,6 @@ class FeatureTransformer:
         df = self._categorize_creative_size(df, 'creative_size')
         df = self._categorize_screen_size(df, 'mobile_screen_size')
         df = self._categorize_viewability(df, 'historical_viewability')
-        df = self._select_columns(df)
         return df
 
     def _extract_time_features(self, df, time_col):
@@ -28,11 +27,11 @@ class FeatureTransformer:
 
         df['processed_period'] = (df[time_col].dt.hour % 24 + 4) // 4
         df['processed_period'].replace({1: 'Late Night',
-                              2: 'Early Morning',
-                              3: 'Morning',
-                              4: 'Noon',
-                              5: 'Evening',
-                              6: 'Night'}, inplace=True)
+                                        2: 'Early Morning',
+                                        3: 'Morning',
+                                        4: 'Noon',
+                                        5: 'Evening',
+                                        6: 'Night'}, inplace=True)
         df = df.drop([time_col], axis=1)
         return df
 
@@ -121,7 +120,16 @@ class FeatureTransformer:
             else:
                 return 'Extra Large'
 
+        def __to_numerical(size_str):
+            if (size_str is None):
+                return -1, -1
+            width, height = map(int, size_str.split('x'))
+            return [width, height]
+
         df['processed_' + mobile_screen_size] = df[mobile_screen_size].apply(lambda x: __replace(x))
+        nums = df[mobile_screen_size].apply(lambda x: __to_numerical(x))
+        df['processed_' + mobile_screen_size + 'w'] = nums.apply(lambda x: x[0])
+        df['processed_' + mobile_screen_size + 'h'] = nums.apply(lambda x: x[1])
         df = df.drop(mobile_screen_size, axis=1)
 
         return df
@@ -141,43 +149,4 @@ class FeatureTransformer:
 
         df['processed_' + viewability] = df[viewability].apply(__replace)
         df = df.drop(viewability, axis=1)
-        return df
-
-    def _select_columns(self, df):
-
-        df = df[[
-         'ssp',
-         'battr',
-         'visibility',
-         'mime_types',
-         'content_tags',
-         'utm_source',
-         'search_engine',
-         'region_code',
-         'accept_encoding',
-         'ua_device_type',
-         'ua_os',
-         'ua_os_version',
-         'creative_type',
-         'floor_cpm',
-         'screen_pixel_ratio',
-         'is_https',
-         'ibv_blocked',
-         'is_interstitial',
-         'iframe_state',
-         'ads_txt_support',
-         'gdpr_regulation',
-         'do_not_track',
-         'user_fraud_state',
-         'is_mobile_optimized_site',
-         'advertiser_id',
-         'creative_id',
-         'timezone_offset',
-         'isp_type',
-         'user_detection_type',
-         'ua_third_party_cookie',
-         'ua_parsing_type',
-         'ua_type',
-         'user_status']]
-
         return df
