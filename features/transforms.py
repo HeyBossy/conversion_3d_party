@@ -63,7 +63,7 @@ class FeatureTransformer:
         return df
 
     def _create_data_by_zipcode(self, df, zipcode):
-        mapping_json_path = 'data/zipcode_to_data.json'
+        mapping_json_path = 'features/zipcode_to_data.json'
         with open(mapping_json_path, 'r', encoding='utf8') as f:
             mapping = json.load(f)
 
