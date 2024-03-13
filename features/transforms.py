@@ -11,15 +11,22 @@ class FeatureTransformer:
         pass
 
     def transform(self, df):
-        df = self._extract_time_features(df, 'time')
-        df = self._replace_browser(df, 'ua_browser')
-        df = self._create_data_by_zipcode(df, 'zip_code')
-        df = self._replace_page_lang(df, 'page_language')
-        df = self._categorize_creative_size(df, 'creative_size')
-        df = self._categorize_screen_size(df, 'mobile_screen_size')
-        df = self._categorize_viewability(df, 'historical_viewability')
+        # df = self._extract_time_features(df, 'time')
+        # df = self._replace_browser(df, 'ua_browser')
+        # df = self._create_data_by_zipcode(df, 'zip_code')
+        # df = self._replace_page_lang(df, 'page_language')
+        # df = self._categorize_creative_size(df, 'creative_size')
+        # df = self._categorize_screen_size(df, 'mobile_screen_size')
+        # df = self._categorize_viewability(df, 'historical_viewability')
+
+        df = self._create_user_seg(df)
         return df
 
+
+    def _create_user_seg(self, df):
+        users_segs = pd.read_parquet('features/users_segs.parquet')
+        df = df.merge(users_segs,  how='left', on='user_id')
+        return df
     def _extract_time_features(self, df, time_col):
         df[time_col] = pd.to_datetime(df[time_col])
         df['processed_hour_of_day'] = df[time_col].dt.hour

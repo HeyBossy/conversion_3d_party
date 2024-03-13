@@ -52,7 +52,7 @@ def run():
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
     cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
-                                   early_stopping_rounds=20)
+                                   early_stopping_rounds=40)
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
     predictions = cb_clf.predict_proba(X_test)[:, 1]
