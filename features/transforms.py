@@ -13,16 +13,16 @@ class FeatureTransformer:
     def transform(self, df):
 
         # that was bad idea xD
-        # df = self._extract_time_features(df, 'time')
-        # df = self._replace_browser(df, 'ua_browser')
-        # df = self._create_data_by_zipcode(df, 'zip_code')
-        # df = self._replace_page_lang(df, 'page_language')
-        # df = self._categorize_creative_size(df, 'creative_size')
-        # df = self._categorize_screen_size(df, 'mobile_screen_size')
-        # df = self._categorize_viewability(df, 'historical_viewability')
+        df = self._extract_time_features(df, 'time')
+        df = self._replace_browser(df, 'ua_browser')
+        df = self._create_data_by_zipcode(df, 'zip_code')
+        df = self._replace_page_lang(df, 'page_language')
+        df = self._categorize_creative_size(df, 'creative_size')
+        df = self._categorize_screen_size(df, 'mobile_screen_size')
+        df = self._categorize_viewability(df, 'historical_viewability')
 
         # that was bad idea too
-        # df = self._create_user_seg(df)
+        df = self._create_user_seg(df)
 
         df = self._create_3d_conv_features(df)
         return df
