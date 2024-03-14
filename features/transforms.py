@@ -11,6 +11,8 @@ class FeatureTransformer:
         pass
 
     def transform(self, df):
+
+        # that was bad idea xD
         # df = self._extract_time_features(df, 'time')
         # df = self._replace_browser(df, 'ua_browser')
         # df = self._create_data_by_zipcode(df, 'zip_code')
@@ -19,7 +21,22 @@ class FeatureTransformer:
         # df = self._categorize_screen_size(df, 'mobile_screen_size')
         # df = self._categorize_viewability(df, 'historical_viewability')
 
-        df = self._create_user_seg(df)
+        # that was bad idea too
+        # df = self._create_user_seg(df)
+
+        df = self._create_3d_conv_features(df)
+        return df
+
+
+    def _create_3d_conv_features(self, df):
+        user_freq = pd.read_pickle('features/user_freq.pkl')
+        df['user_3d_freq'] = df['user_id'].map(user_freq)
+        df['user_3d_freq'] = df['user_3d_freq'].fillna(0)
+
+        user_conv_types_and_count = pd.read_pickle('features/user_conversion_types_and_count.pkl')
+        df = df.set_index('user_id').join(user_conv_types_and_count, how='left')
+        df = df.reset_index()
+
         return df
 
 
