@@ -51,17 +51,17 @@ def run():
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-    optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
+    # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
-    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
-    #                                early_stopping_rounds=40)
-    # cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
+    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
+                                   early_stopping_rounds=20)
+    cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
-    # predictions = cb_clf.predict_proba(X_test)[:, 1]
-    #
-    # print("Save model..")
-    # cb_clf.save_model(MODEL_PATH)
-    # return predictions
+    predictions = cb_clf.predict_proba(X_test)[:, 1]
+
+    print("Save model..")
+    cb_clf.save_model(MODEL_PATH)
+    return predictions
 
 
 def make_pedictions(test_df_path):

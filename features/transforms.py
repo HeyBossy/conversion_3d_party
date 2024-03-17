@@ -15,13 +15,23 @@ class FeatureTransformer:
     def transform(self, df):
 
         # that was bad idea xD
-        # df = self._extract_time_features(df, 'time')
-        # df = self._replace_browser(df, 'ua_browser')
+        df = self._extract_time_features(df, 'time')
+        df = self._replace_browser(df, 'ua_browser')
         # df = self._create_data_by_zipcode(df, 'zip_code')
-        # df = self._replace_page_lang(df, 'page_language')
-        # df = self._categorize_creative_size(df, 'creative_size')
-        # df = self._categorize_screen_size(df, 'mobile_screen_size')
-        # df = self._categorize_viewability(df, 'historical_viewability')
+
+
+        df = self._replace_page_lang(df, 'page_language')
+        df = self._categorize_creative_size(df, 'creative_size')
+        df = self._categorize_screen_size(df, 'mobile_screen_size')
+        df = self._categorize_viewability(df, 'historical_viewability')
+        df = self.ua_browser_version_freq(df)
+        df = self.tag_id_freq(df)
+        df = self.bid_isp_name(df)
+        df = self.select_domain_landing_page(df)
+        df = self.select_domain_bid_url(df)
+        df = self.select_domain_bid_referer(df)
+        df = self.select_big_city(df)
+
 
         # that was bad idea too
         # df = self._create_user_seg(df)
@@ -36,8 +46,7 @@ class FeatureTransformer:
         df['ua_browser_version'].fillna("unknown", inplace=True)
         df['ua_browser_version'] = df['ua_browser_version'].map(freq)
         df['ua_browser_version'].fillna("rare", inplace=True)
-
-        df['ua_browser_version'].value_counts(dropna=False)
+        df['ua_browser_version'] = df['ua_browser_version'].astype('str')
 
         return df
 
@@ -48,8 +57,7 @@ class FeatureTransformer:
         df['tag_id'] = df['tag_id'].map(freq)
         df['tag_id'].fillna("rare", inplace=True)
 
-        df['tag_id'].value_counts(dropna=False)
-
+        df['tag_id'] = df['tag_id'].astype('str')
         return df
 
     def bid_isp_name(self, df):
@@ -65,28 +73,28 @@ class FeatureTransformer:
 
             return "rare"
 
-        df = df['bid_isp_name'].apply(bid_isp_name_processing).value_counts()
+        df['bid_isp_name'] = df['bid_isp_name'].apply(bid_isp_name_processing).value_counts()
 
         return df
     def select_domain_landing_page(self, df):
         df['landing_page_domain'] = df['landing_page'].apply(
             lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
 
-        df.drop(['landing_page'], inplace=True)
+        df.drop(['landing_page'], axis=1, inplace=True)
         return df
 
     def select_domain_bid_url(self, df):
         df['bid_url_domain'] = df['bid_url'].apply(
             lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
 
-        df.drop(['bid_url'], inplace=True)
+        df.drop(['bid_url'], axis=1, inplace=True)
         return df
 
     def select_domain_bid_referer(self, df):
         df['bid_referer_domain'] = df['bid_referer'].apply(
             lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
 
-        df.drop(['bid_referer'], inplace=True)
+        df.drop(['bid_referer'], axis=1,  inplace=True)
         return df
 
 
