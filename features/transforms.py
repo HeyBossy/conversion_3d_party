@@ -32,6 +32,17 @@ class FeatureTransformer:
         df = self.select_domain_bid_referer(df)
         df = self.select_big_city(df)
 
+        df = self._categorize_search_terms(df, 'search_terms')
+        
+        #select
+        df = df[['ua_browser_version',  'tag_id', 'bid_isp_name',
+                 'landing_page_domain', 'bid_url_domain', 'category_city',
+                 'user_segments',
+        'processed_hour_of_day', 'processed_day_of_week', 'processed_period', 
+        'processed_ua_browser',
+       'processed_page_language', 'processed_creative_size',
+       'processed_historical_viewability', 'processed_search_terms']]
+
 
         # that was bad idea too
         # df = self._create_user_seg(df)
@@ -260,3 +271,28 @@ class FeatureTransformer:
         df['processed_' + viewability] = df[viewability].apply(__replace)
         df = df.drop(viewability, axis=1)
         return df
+
+    def _categorize_search_terms(self, df, search_terms):
+        '''Оптимизируем поисковые запросы'''
+        model_path = 'features/svc_model.joblib'
+        # Загрузка модели из файла
+        loaded_model = load(model_path)
+
+        # Убираем None
+        search_terms_notna = df[df[search_terms].notna()]
+
+        # Размечаем search_terms
+        predictions_terms = loaded_model.predict(search_terms_notna[search_terms])
+
+        # Добавляем предсказания в новый столбец в DataFrame
+        search_terms_notna['processed_' + search_terms] = predictions_terms
+
+        # Объединение обратно с исходным DataFrame
+        df_new = df.merge(
+            search_terms_notna[['user_id', 'tag_id', search_terms, 'processed_' + search_terms]],
+            on=['user_id', 'tag_id', search_terms],
+            how='left'
+        )
+        df_new['processed_' + search_terms] = df_new['processed_' + search_terms].fillna('Неизвестно')
+        df_new = df_new.drop(search_terms, axis=1)
+        return df_new
