@@ -20,7 +20,6 @@ class FeatureTransformer:
         df = self._replace_browser(df, 'ua_browser')
         # df = self._create_data_by_zipcode(df, 'zip_code')
 
-
         df = self._replace_page_lang(df, 'page_language')
         df = self._categorize_creative_size(df, 'creative_size')
         df = self._categorize_screen_size(df, 'mobile_screen_size')
@@ -34,23 +33,21 @@ class FeatureTransformer:
         df = self.select_big_city(df)
 
         df = self._categorize_search_terms(df, 'search_terms')
-        
-        #select
-        df = df[['ua_browser_version',  'tag_id', 'bid_isp_name',
+
+        # select
+        df = df[['ua_browser_version', 'tag_id', 'bid_isp_name',
                  'landing_page_domain', 'bid_url_domain', 'category_city',
                  'user_segments',
-        'processed_hour_of_day', 'processed_day_of_week', 'processed_period', 
-        'processed_ua_browser',
-       'processed_page_language', 'processed_creative_size',
-       'processed_historical_viewability', 'processed_search_terms']]
-
+                 'processed_hour_of_day', 'processed_day_of_week', 'processed_period',
+                 'processed_ua_browser',
+                 'processed_page_language', 'processed_creative_size',
+                 'processed_historical_viewability', 'processed_search_terms']]
 
         # that was bad idea too
         # df = self._create_user_seg(df)
 
         # df = self._create_3d_conv_features(df)
         return df
-
 
     def ua_browser_version_freq(self, df):
         freq = pd.read_pickle('features/ua_browser_version_freq.pkl')
@@ -88,6 +85,7 @@ class FeatureTransformer:
         df['bid_isp_name'] = df['bid_isp_name'].apply(bid_isp_name_processing).value_counts()
 
         return df
+
     def select_domain_landing_page(self, df):
         df['landing_page_domain'] = df['landing_page'].apply(
             lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
@@ -106,9 +104,8 @@ class FeatureTransformer:
         df['bid_referer_domain'] = df['bid_referer'].apply(
             lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
 
-        df.drop(['bid_referer'], axis=1,  inplace=True)
+        df.drop(['bid_referer'], axis=1, inplace=True)
         return df
-
 
     def select_big_city(self, df):
         million_cities = [
@@ -274,26 +271,13 @@ class FeatureTransformer:
         return df
 
     def _categorize_search_terms(self, df, search_terms):
-        '''Оптимизируем поисковые запросы'''
         model_path = 'features/svc_model.joblib'
-        # Загрузка модели из файла
         loaded_model = load(model_path)
 
-        # Убираем None
-        search_terms_notna = df[df[search_terms].notna()]
-
-        # Размечаем search_terms
-        predictions_terms = loaded_model.predict(search_terms_notna[search_terms])
-
-        # Добавляем предсказания в новый столбец в DataFrame
-        search_terms_notna['processed_' + search_terms] = predictions_terms
-
-        # Объединение обратно с исходным DataFrame
-        df_new = df.merge(
-            search_terms_notna[['user_id', 'tag_id', search_terms, 'processed_' + search_terms]],
-            on=['user_id', 'tag_id', search_terms],
-            how='left'
-        )
-        df_new['processed_' + search_terms] = df_new['processed_' + search_terms].fillna('Неизвестно')
-        df_new = df_new.drop(search_terms, axis=1)
-        return df_new
+        na_values = df[df[search_terms].isna()].index
+        df[search_terms] = df[search_terms].fillna('')
+        predictions_terms = loaded_model.predict(df[search_terms])
+        df['processed_' + search_terms] = predictions_terms
+        df.loc[na_values, 'processed_' + search_terms] = 'unknown'
+        df = df.drop(search_terms, axis=1)
+        return df
