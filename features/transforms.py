@@ -35,13 +35,13 @@ class FeatureTransformer:
         df = self._categorize_search_terms(df, 'search_terms')
 
         # select
-        df = df[['ua_browser_version', 'tag_id', 'bid_isp_name',
-                 'landing_page_domain', 'bid_url_domain', 'category_city',
-                 'user_segments',
-                 'processed_hour_of_day', 'processed_day_of_week', 'processed_period',
-                 'processed_ua_browser',
-                 'processed_page_language', 'processed_creative_size',
-                 'processed_historical_viewability', 'processed_search_terms']]
+        # df = df[['ua_browser_version', 'tag_id', 'bid_isp_name',
+        #          'landing_page_domain', 'bid_url_domain', 'category_city',
+        #          'user_segments',
+        #          'processed_hour_of_day', 'processed_day_of_week', 'processed_period',
+        #          'processed_ua_browser',
+        #          'processed_page_language', 'processed_creative_size',
+        #          'processed_historical_viewability', 'processed_search_terms']]
 
         # that was bad idea too
         # df = self._create_user_seg(df)
