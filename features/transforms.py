@@ -290,8 +290,11 @@ class FeatureTransformer:
 
         # Объединение обратно с исходным DataFrame
         df_new = df.merge(
-            search_terms_notna[['user_id', 'tag_id', search_terms, 'processed_' + search_terms]],
-            on=['user_id', 'tag_id', search_terms],
+            search_terms_notna[['user_id', 'tag_id', 'bid_url', 'user_detection_type',
+                                'landing_page',
+                                search_terms, 'processed_' + search_terms]],
+            on=['user_id', 'tag_id', 'bid_url', 'user_detection_type',
+                'landing_page',search_terms],
             how='left'
         )
         df_new['processed_' + search_terms] = df_new['processed_' + search_terms].fillna('Неизвестно')
