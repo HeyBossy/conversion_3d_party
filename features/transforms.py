@@ -1,4 +1,5 @@
 import pandas as pd
+from joblib import load
 import json
 from features.variables import common_screen_size
 from urllib.parse import urlparse
