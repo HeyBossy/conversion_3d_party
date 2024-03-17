@@ -1,6 +1,8 @@
 import pandas as pd
 import json
 from features.variables import common_screen_size
+from urllib.parse import urlparse
+import pickle
 
 
 class FeatureTransformer:
@@ -13,20 +15,96 @@ class FeatureTransformer:
     def transform(self, df):
 
         # that was bad idea xD
-        df = self._extract_time_features(df, 'time')
-        df = self._replace_browser(df, 'ua_browser')
-        df = self._create_data_by_zipcode(df, 'zip_code')
-        df = self._replace_page_lang(df, 'page_language')
-        df = self._categorize_creative_size(df, 'creative_size')
-        df = self._categorize_screen_size(df, 'mobile_screen_size')
-        df = self._categorize_viewability(df, 'historical_viewability')
+        # df = self._extract_time_features(df, 'time')
+        # df = self._replace_browser(df, 'ua_browser')
+        # df = self._create_data_by_zipcode(df, 'zip_code')
+        # df = self._replace_page_lang(df, 'page_language')
+        # df = self._categorize_creative_size(df, 'creative_size')
+        # df = self._categorize_screen_size(df, 'mobile_screen_size')
+        # df = self._categorize_viewability(df, 'historical_viewability')
 
         # that was bad idea too
-        df = self._create_user_seg(df)
+        # df = self._create_user_seg(df)
 
-        df = self._create_3d_conv_features(df)
+        # df = self._create_3d_conv_features(df)
         return df
 
+
+    def ua_browser_version_freq(self, df):
+        freq = pd.read_pickle('features/ua_browser_version_freq.pkl')
+
+        df['ua_browser_version'].fillna("unknown", inplace=True)
+        df['ua_browser_version'] = df['ua_browser_version'].map(freq)
+        df['ua_browser_version'].fillna("rare", inplace=True)
+
+        df['ua_browser_version'].value_counts(dropna=False)
+
+        return df
+
+    def tag_id_freq(self, df):
+        freq = pd.read_pickle('features/tag_id_freq.pkl')
+
+        df['tag_id'].fillna("unknown", inplace=True)
+        df['tag_id'] = df['tag_id'].map(freq)
+        df['tag_id'].fillna("rare", inplace=True)
+
+        df['tag_id'].value_counts(dropna=False)
+
+        return df
+
+    def bid_isp_name(self, df):
+        with open('features/bid_isp_name_freq_list.pkl', 'rb') as f:
+            freq = pickle.load(f)
+
+        def bid_isp_name_processing(bid_isp_name):
+            if bid_isp_name is None:
+                return "unknown"
+
+            if bid_isp_name in freq:
+                return bid_isp_name
+
+            return "rare"
+
+        df = df['bid_isp_name'].apply(bid_isp_name_processing).value_counts()
+
+        return df
+    def select_domain_landing_page(self, df):
+        df['landing_page_domain'] = df['landing_page'].apply(
+            lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
+
+        df.drop(['landing_page'], inplace=True)
+        return df
+
+    def select_domain_bid_url(self, df):
+        df['bid_url_domain'] = df['bid_url'].apply(
+            lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
+
+        df.drop(['bid_url'], inplace=True)
+        return df
+
+    def select_domain_bid_referer(self, df):
+        df['bid_referer_domain'] = df['bid_referer'].apply(
+            lambda x: urlparse(x).netloc if pd.notnull(x) else 'unknown')
+
+        df.drop(['bid_referer'], inplace=True)
+        return df
+
+
+    def select_big_city(self, df):
+        million_cities = [
+            "Moskva", "Sankt-Peterburg", "Novosibirsk", "Yekaterinburg",
+            "Nizhniy Novgorod", "Kazan", "Chelyabinsk", "Omsk", "Samara",
+            "Rostov-on-Don", "Ufa", "Krasnoyarsk", "Perm", "Voronezh", "Volgograd"
+        ]
+
+        city_counts = df['city'].value_counts()
+        df['city_count'] = df['city'].map(city_counts)
+        df['category_city'] = df.apply(
+            lambda x: 'freq_million_city' if (x['city'] in million_cities and x['city_count'] >= 100) else 'other',
+            axis=1
+        )
+
+        return df
 
     def _create_3d_conv_features(self, df):
         user_freq = pd.read_pickle('features/user_freq.pkl')
@@ -39,11 +117,11 @@ class FeatureTransformer:
 
         return df
 
-
     def _create_user_seg(self, df):
         users_segs = pd.read_parquet('features/users_segs.parquet')
-        df = df.merge(users_segs,  how='left', on='user_id')
+        df = df.merge(users_segs, how='left', on='user_id')
         return df
+
     def _extract_time_features(self, df, time_col):
         df[time_col] = pd.to_datetime(df[time_col])
         df['processed_hour_of_day'] = df[time_col].dt.hour

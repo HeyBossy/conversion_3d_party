@@ -1,7 +1,7 @@
 import pandas as pd
 import catboost as cb
 from features.transforms import FeatureTransformer
-
+from model_optimization.catboost_opt import optimize_model
 #######################
 #
 # This is a (very) simple solution to the classification problem of
@@ -51,15 +51,17 @@ def run():
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
-                                   early_stopping_rounds=40)
-    cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
+    optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
-    predictions = cb_clf.predict_proba(X_test)[:, 1]
+    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
+    #                                early_stopping_rounds=40)
+    # cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
-    print("Save model..")
-    cb_clf.save_model(MODEL_PATH)
-    return predictions
+    # predictions = cb_clf.predict_proba(X_test)[:, 1]
+    #
+    # print("Save model..")
+    # cb_clf.save_model(MODEL_PATH)
+    # return predictions
 
 
 def make_pedictions(test_df_path):

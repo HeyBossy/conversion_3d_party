@@ -1,0 +1,1 @@
+{"objective": "Logloss", "eval_metric": "AUC", "random_seed": 42, "learning_rate": 0.052491609976058104, "l2_leaf_reg": 3.380145398720991, "subsample": 0.9899155576333047, "depth": 9, "border_count": 160, "grow_policy": "Lossguide", "iterations": 100, "max_leaves": 46}
