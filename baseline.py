@@ -53,8 +53,20 @@ def run():
 
     # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
-    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
-                                   early_stopping_rounds=20)
+   # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
+    #                               early_stopping_rounds=20)
+    cb_clf = cb.CatBoostClassifier(
+        cat_features=cat_features,
+        eval_metric="AUC",
+        early_stopping_rounds=20,
+        learning_rate=0.03,  # Обновленный параметр
+        depth=6,  # Обновленный параметр
+        iterations=1000,  # Обновленный параметр
+        l2_leaf_reg=3,  # Обновленный параметр
+        random_strength=1,  # Обновленный параметр
+        bagging_temperature=0.8,  # Обновленный параметр
+        verbose=100  # Вывод информации каждые 100 итераций
+    )
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
     predictions = cb_clf.predict_proba(X_test)[:, 1]

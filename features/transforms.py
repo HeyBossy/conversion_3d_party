@@ -18,7 +18,6 @@ class FeatureTransformer:
         # that was bad idea xD
         df = self._extract_time_features(df, 'time')
         df = self._replace_browser(df, 'ua_browser')
-        # df = self._create_data_by_zipcode(df, 'zip_code')
 
         df = self._replace_page_lang(df, 'page_language')
         df = self._categorize_creative_size(df, 'creative_size')
@@ -33,20 +32,31 @@ class FeatureTransformer:
         df = self.select_big_city(df)
 
         df = self._categorize_search_terms(df, 'search_terms')
+        df = self._threed_conv_feature(df, 'user_id')
 
-        # select
-        # df = df[['ua_browser_version', 'tag_id', 'bid_isp_name',
-        #          'landing_page_domain', 'bid_url_domain', 'category_city',
-        #          'user_segments',
-        #          'processed_hour_of_day', 'processed_day_of_week', 'processed_period',
-        #          'processed_ua_browser',
-        #          'processed_page_language', 'processed_creative_size',
-        #          'processed_historical_viewability', 'processed_search_terms']]
-
-        # that was bad idea too
+        # govno
+        # df = self._create_data_by_zipcode(df, 'zip_code')
         # df = self._create_user_seg(df)
-
         # df = self._create_3d_conv_features(df)
+        # select
+        df = df.drop(
+            columns=['bid_ip',  'page_language',
+                     'ssp', 'publisher_id', 'creative_id',
+                      'mobile_screen_size', 'historical_viewability',
+
+                     'advertiser_id', 'creative_size',
+
+                     'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os',
+
+                     'ua_device_type', 'time', 'ua_third_party_cookie', 'user_status',
+
+                     'content_category', 'carrier_id', 'full_placement_id', 'city', 'zip_code', 'user_segments',
+
+                     'user_id', 'time', 'search_terms', 'city_count'
+                     ],
+            errors='ignore'
+        )
+
         return df
 
     def ua_browser_version_freq(self, df):
@@ -280,4 +290,12 @@ class FeatureTransformer:
         df['processed_' + search_terms] = predictions_terms
         df.loc[na_values, 'processed_' + search_terms] = 'unknown'
         df = df.drop(search_terms, axis=1)
+        return df
+
+    def _threed_conv_feature(self, df, user_id):
+        userid_freq = pd.read_pickle('./features/user_id_freq.pkl')
+        df['3d_userid_freq'] = df[user_id].map(userid_freq)
+
+        good_conv_freq = pd.read_pickle('./features/good_conv_freq.pkl')
+        df['3d_good_conv_freq'] = df[user_id].map(good_conv_freq)
         return df
