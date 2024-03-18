@@ -34,7 +34,6 @@ def run():
     # rename target column
     df['label'] = df['is_post_click']
     df.drop('is_post_click', inplace=True, axis=1)
-
     split_date = '2024-01-17'
     X_train = df[(df.time < split_date)].drop(['label'], axis=1)
     y_train = df.label[(df.time < split_date)]
@@ -44,13 +43,32 @@ def run():
     feature_transformer.fit(X_train)
     X_train = feature_transformer.transform(X_train)
     X_test = feature_transformer.transform(X_test)
+    X_train.value_counts('ads_txt_support')
+    # cat_features = list(X_train.columns[X_train.dtypes == 'object'])
+    # num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
+    cat_features = [
+        'bid_isp_name', 'tag_id', 'creative_type', 'visibility', 'model',
+        'is_https', 'ibv_blocked', 'is_interstitial', 'mime_types', 'content_tags',
+        'iframe_state', 'ads_txt_support', 'gdpr_regulation', 'do_not_track',
+        'user_fraud_state', 'is_mobile_optimized_site', 'utm_source', 'search_engine',
+        'region_code', 'isp_type', 'user_detection_type', 'ud_cookie_ts', 'accept_encoding',
+        'accept_language', 'ua_parsing_type', 'ua_type', 'processed_ua_browser',
+        'processed_page_language', 'processed_creative_size', 'processed_mobile_screen_size',
+        'landing_page_domain', 'bid_url_domain', 'bid_referer_domain', 'category_city',
+        'processed_search_terms'
+    ]
 
-    cat_features = list(X_train.columns[X_train.dtypes == 'object'])
-    num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
-
+    num_features = [
+        'floor_cpm', 'screen_pixel_ratio', 'processed_hour_of_day', 'processed_day_of_week',
+        'processed_mobile_screen_sizew', 'processed_mobile_screen_sizeh',
+        '3d_userid_freq', '3d_good_conv_freq'
+    ]
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
+    for col in cat_features:
+        X_train[col] = X_train[col].astype(str)
+        X_test[col] = X_test[col].astype(str)
     # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
@@ -59,16 +77,16 @@ def run():
         cat_features=cat_features,
         eval_metric="AUC",
         early_stopping_rounds=20,
-        learning_rate=0.03,  # Обновленный параметр
         depth=6,  # Обновленный параметр
-        iterations=1000,  # Обновленный параметр
         l2_leaf_reg=3,  # Обновленный параметр
         random_strength=1,  # Обновленный параметр
         bagging_temperature=0.8,  # Обновленный параметр
-        verbose=100  # Вывод информации каждые 100 итераций
     )
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
+    feature_importances = cb_clf.get_feature_importance(prettified=True)
+
+    #print(f'Важность признаков  {feature_importances}')
     predictions = cb_clf.predict_proba(X_test)[:, 1]
 
     print("Save model..")

@@ -39,23 +39,21 @@ class FeatureTransformer:
         # df = self._create_user_seg(df)
         # df = self._create_3d_conv_features(df)
         # select
-        df = df.drop(
-            columns=['bid_ip',  'page_language',
-                     'ssp', 'publisher_id', 'creative_id',
-                      'mobile_screen_size', 'historical_viewability',
+        # df = df.drop(columns=[
+        #   'bid_ip', 'page_language', 'ssp', 'publisher_id', 'creative_id',
+        #   'mobile_screen_size', 'historical_viewability','advertiser_id', 'creative_size',
+        #   'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
+        #   'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
+        #   'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
+        #   'city_count',
+        #   ЭТИ Я УЖЕ ХЗ
+        #   'accept_encoding', 'accept_language', 'battr', 'model',
+        #   'mime_types', 'content_tags', 'device_screen', 'utm_source', 'search_engine',
+        #   'region_code', 'ud_cookie_ts', 'floor_cpm', 'screen_pixel_ratio',
+        #   'is_https', 'ibv_blocked', 'is_interstitial', 'iframe_state', 'ads_txt_support',
+        #   'gdpr_regulation', 'timezone_offset', 'isp_type'
+        # ], errors='ignore')
 
-                     'advertiser_id', 'creative_size',
-
-                     'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os',
-
-                     'ua_device_type', 'time', 'ua_third_party_cookie', 'user_status',
-
-                     'content_category', 'carrier_id', 'full_placement_id', 'city', 'zip_code', 'user_segments',
-
-                     'user_id', 'time', 'search_terms', 'city_count'
-                     ],
-            errors='ignore'
-        )
 
         return df
 
