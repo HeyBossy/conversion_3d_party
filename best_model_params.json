@@ -1,1 +1,1 @@
-{"objective": "Logloss", "eval_metric": "AUC", "random_seed": 42, "learning_rate": 0.1559792419520629, "l2_leaf_reg": 5.478580421114449, "subsample": 0.5676924105538342, "depth": 6, "border_count": 112, "grow_policy": "Depthwise", "iterations": 100}
+{"objective": "Logloss", "eval_metric": "AUC", "random_seed": 42, "learning_rate": 0.1731238545780306, "l2_leaf_reg": 0.10839139936139851, "subsample": 0.8176468720202248, "depth": 5, "border_count": 159, "grow_policy": "Depthwise", "iterations": 100}

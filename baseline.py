@@ -58,7 +58,7 @@ def run():
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-   # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
+    # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
     #                               early_stopping_rounds=20)
@@ -66,14 +66,12 @@ def run():
              cat_features=cat_features,
             eval_metric="AUC",
            early_stopping_rounds=20,
-           depth=6,  # Обновленный параметр
-           l2_leaf_reg=5,  # Обновленный параметр
-           random_strength=1,  # Обновленный параметр
-        border_count = 112,
-        grow_policy = 'Depthwise',
-        learning_rate = 0.16,
-        subsample = 0.56,
-        bagging_temperature=0.8,  # Обновленный параметр
+           depth=5,  # Обновленный параметр
+           l2_leaf_reg=0.10839139936139851,  # Обновленный параметр
+        border_count =159,
+        grow_policy ='Depthwise',
+        learning_rate =0.1731238545780306,
+        subsample =0.8176468720202248,
      )
 
 
