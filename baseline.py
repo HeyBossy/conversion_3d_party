@@ -6,8 +6,8 @@ import optuna
 import catboost as cb
 from sklearn.metrics import roc_auc_score
 
-
 from model_optimization.catboost_opt import optimize_model
+
 #######################
 #
 # This is a (very) simple solution to the classification problem of
@@ -21,6 +21,7 @@ THIRD_PARTY_PATH = './data/private_info/third_party_conversions.parquet'
 MODEL_PATH = 'trained_model.cb'
 
 feature_transformer = FeatureTransformer()
+
 
 def run():
     # Some datasets are quite big. All together they take ~ 15Gb RAM
@@ -60,20 +61,19 @@ def run():
 
     # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
-   # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
+    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
     #                               early_stopping_rounds=20)
     cb_clf = cb.CatBoostClassifier(
-             cat_features=cat_features,
-            eval_metric="AUC",
-           early_stopping_rounds=20,
-           depth=5,  # Обновленный параметр
-           l2_leaf_reg=0.10839139936139851,  # Обновленный параметр
-        border_count =159,
-        grow_policy ='Depthwise',
-        learning_rate =0.1731238545780306,
-        subsample =0.8176468720202248,
-     )
-
+        cat_features=cat_features,
+        eval_metric="AUC",
+        early_stopping_rounds=20,
+        depth=5,  # Обновленный параметр
+        l2_leaf_reg=0.10839139936139851,  # Обновленный параметр
+        border_count=159,
+        grow_policy='Depthwise',
+        learning_rate=0.1731238545780306,
+        subsample=0.8176468720202248,
+    )
 
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 

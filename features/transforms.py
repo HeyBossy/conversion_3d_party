@@ -34,20 +34,22 @@ class FeatureTransformer:
         df = self._categorize_search_terms(df, 'search_terms')
         df = self._threed_conv_feature(df, 'user_id')
 
+        df = self._ua_type_feature(df)
+        df = self._ud_cookie_ts_feature(df)
+        df = self._bid_isp_name_feature(df)
+
         # govno
         df = self._create_data_by_zipcode(df, 'zip_code')
         # select
         df = df.drop(columns=[
-        'bid_ip', 'page_language', 'ssp', 'publisher_id', 'creative_id',
-        'mobile_screen_size', 'historical_viewability','advertiser_id', 'creative_size',
-        'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
-        'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
-        'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
-        'city_count',
-        'user_id', 'accept_language'
-        'timezone_offset', 'zip_code',  'device_screen'], errors='ignore')
-
-
+            'bid_ip', 'page_language', 'ssp', 'publisher_id', 'creative_id',
+            'mobile_screen_size', 'historical_viewability', 'advertiser_id', 'creative_size',
+            'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
+            'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
+            'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
+            'city_count',
+            'user_id', 'accept_language'
+                       'timezone_offset', 'zip_code', 'device_screen', 'time'], errors='ignore')
 
         return df
 
@@ -153,7 +155,7 @@ class FeatureTransformer:
                                         4: 'Noon',
                                         5: 'Evening',
                                         6: 'Night'}, inplace=True)
-        df = df.drop([time_col], axis=1)
+        # df = df.drop([time_col], axis=1)
         return df
 
     def _replace_browser(self, df, ua_browser_col):
@@ -290,4 +292,22 @@ class FeatureTransformer:
 
         good_conv_freq = pd.read_pickle('./features/good_conv_freq.pkl')
         df['3d_good_conv_freq'] = df[user_id].map(good_conv_freq)
+        return df
+
+    def _ua_type_feature(self, df):
+        df['processed_ua_type'] = df['ua_type'].astype('object')
+        df = df.drop('ua_type', axis=1)
+        return df
+
+    def _ud_cookie_ts_feature(self, df):
+        df['ud_cookie_ts'] = pd.to_datetime(df['ud_cookie_ts'])
+        df['time'] = pd.to_datetime(df['time'])
+        df['processed_ud_cookie_ts'] = (df['time'] - df['ud_cookie_ts']).dt.total_seconds()
+        df = df.drop('ud_cookie_ts', axis=1)
+        return df
+
+    def _bid_isp_name_feature(self, df):
+        bid_isp_name_freq = pd.read_pickle('./features/bid_isp_name.freq')
+        df['processed_bid_isp_name'] = df['bid_isp_name'].map(bid_isp_name_freq)
+        df = df.drop('bid_isp_name', axis=1)
         return df
