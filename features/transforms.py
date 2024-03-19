@@ -49,9 +49,9 @@ class FeatureTransformer:
             'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
             'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
             'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
-            'city_count',
-            'user_id', 'accept_language'
-                       'timezone_offset', 'zip_code', 'device_screen', 'time'], errors='ignore')
+            'city_count','ua_parsing_type',
+            'user_id', 'accept_language',
+                       'timezone_offset', 'zip_code', 'device_screen', 'time', 'region_code',], errors='ignore')
 
         return df
 
