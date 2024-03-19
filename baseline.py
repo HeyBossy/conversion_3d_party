@@ -1,6 +1,12 @@
 import pandas as pd
 import catboost as cb
 from features.transforms import FeatureTransformer
+
+import optuna
+import catboost as cb
+from sklearn.metrics import roc_auc_score
+
+
 from model_optimization.catboost_opt import optimize_model
 #######################
 #
@@ -36,6 +42,7 @@ def run():
     df.drop('is_post_click', inplace=True, axis=1)
     split_date = '2024-01-17'
     X_train = df[(df.time < split_date)].drop(['label'], axis=1)
+    print(X_train.dtypes)
     y_train = df.label[(df.time < split_date)]
     X_test = df[(df.time >= split_date)].drop(['label'], axis=1)
     y_test = df.label[(df.time >= split_date)]
@@ -44,43 +51,32 @@ def run():
     X_train = feature_transformer.transform(X_train)
     X_test = feature_transformer.transform(X_test)
     cat_features = list(X_train.columns[X_train.dtypes == 'object'])
+    print('cat_features', cat_features)
     num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
-     #cat_features = [
-     #    'tag_id',  'visibility',
-     #   'is_https',  'mime_types', 'content_tags',
-     #   'iframe_state', 'ads_txt_support', 'gdpr_regulation', 'do_not_track',
-     #   'is_mobile_optimized_site', 'utm_source', 'search_engine',
-     #    'isp_type', 'user_detection_type', 'ud_cookie_ts', 'accept_encoding',
-     #     'ua_type', 'processed_ua_browser',
-     #   'processed_page_language', 'processed_creative_size',
-     #   'landing_page_domain',
-    #    'processed_search_terms',
-    #]
+    print('num_features', num_features)
 
-   # num_features = [
-     #   'floor_cpm', 'processed_hour_of_day', 'processed_day_of_week',
-     #   'processed_mobile_screen_sizew', 'processed_mobile_screen_sizeh',
-     #   '3d_userid_freq', '3d_good_conv_freq', 'region_code'
-    #]
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-    for col in cat_features:
-        X_train[col] = X_train[col].astype(str)
-        X_test[col] = X_test[col].astype(str)
-    # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
+   # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
    # cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
     #                               early_stopping_rounds=20)
     cb_clf = cb.CatBoostClassifier(
-        cat_features=cat_features,
-        eval_metric="AUC",
-        early_stopping_rounds=20,
-        depth=6,  # Обновленный параметр
-        l2_leaf_reg=3,  # Обновленный параметр
-        random_strength=1,  # Обновленный параметр
+             cat_features=cat_features,
+            eval_metric="AUC",
+           early_stopping_rounds=20,
+           depth=6,  # Обновленный параметр
+           l2_leaf_reg=5,  # Обновленный параметр
+           random_strength=1,  # Обновленный параметр
+        border_count = 112,
+        grow_policy = 'Depthwise',
+        learning_rate = 0.16,
+        subsample = 0.56,
         bagging_temperature=0.8,  # Обновленный параметр
-    )
+     )
+
+
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
     feature_importances = cb_clf.get_feature_importance(prettified=True)

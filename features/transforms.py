@@ -45,7 +45,8 @@ class FeatureTransformer:
         'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
         'city_count',
         'user_id', 'accept_language'
-        'timezone_offset', 'zip_code'], errors='ignore')
+        'timezone_offset', 'zip_code'
+        'is_interstitial', 'iframe_state', 'is_https', 'ua_parsing_type', 'ua_type', 'device_screen', 'isp_type'], errors='ignore')
 
 
 
@@ -84,7 +85,7 @@ class FeatureTransformer:
 
             return "rare"
 
-        df['bid_isp_name'] = df['bid_isp_name'].apply(bid_isp_name_processing).value_counts()
+        df['bid_isp_name'] = df['bid_isp_name'].apply(bid_isp_name_processing)
 
         return df
 
