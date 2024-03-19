@@ -37,6 +37,8 @@ class FeatureTransformer:
         df = self._ua_type_feature(df)
         df = self._ud_cookie_ts_feature(df)
         df = self._bid_isp_name_feature(df)
+        df = self._utm_source_feature(df)
+        df = self._pr_region_code_freq_feature(df)
 
         # govno
         df = self._create_data_by_zipcode(df, 'zip_code')
@@ -308,6 +310,16 @@ class FeatureTransformer:
 
     def _bid_isp_name_feature(self, df):
         bid_isp_name_freq = pd.read_pickle('./features/bid_isp_name.freq')
-        df['processed_bid_isp_name'] = df['bid_isp_name'].map(bid_isp_name_freq)
+        df['processed_bid_isp_name'] = df['user_id'].map(bid_isp_name_freq)
         df = df.drop('bid_isp_name', axis=1)
+        return df
+
+    def _utm_source_feature(self, df):
+        processed_utm_source = pd.read_pickle('./features/processed_utm_source_freq')
+        df['processed_utm_source_freq'] = df['user_id'].map(processed_utm_source)
+        return df
+
+    def _pr_region_code_freq_feature(self, df):
+        pr_region_code_freq = pd.read_pickle('./features/pr_region_code_freq.pkl')
+        df['pr_region_code_freq'] = df['user_id'].map(pr_region_code_freq)
         return df

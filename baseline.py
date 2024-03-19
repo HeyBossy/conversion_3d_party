@@ -79,6 +79,8 @@ def run():
 
     feature_importances = cb_clf.get_feature_importance(prettified=True)
 
+
+
     print(f'Важность признаков  {feature_importances}')
     predictions = cb_clf.predict_proba(X_test)[:, 1]
 
