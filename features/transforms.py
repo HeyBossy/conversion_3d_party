@@ -35,24 +35,18 @@ class FeatureTransformer:
         df = self._threed_conv_feature(df, 'user_id')
 
         # govno
-        # df = self._create_data_by_zipcode(df, 'zip_code')
-        # df = self._create_user_seg(df)
-        # df = self._create_3d_conv_features(df)
+        df = self._create_data_by_zipcode(df, 'zip_code')
         # select
-        # df = df.drop(columns=[
-        #   'bid_ip', 'page_language', 'ssp', 'publisher_id', 'creative_id',
-        #   'mobile_screen_size', 'historical_viewability','advertiser_id', 'creative_size',
-        #   'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
-        #   'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
-        #   'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
-        #   'city_count',
-        #   ЭТИ Я УЖЕ ХЗ
-        #   'accept_encoding', 'accept_language', 'battr', 'model',
-        #   'mime_types', 'content_tags', 'device_screen', 'utm_source', 'search_engine',
-        #   'region_code', 'ud_cookie_ts', 'floor_cpm', 'screen_pixel_ratio',
-        #   'is_https', 'ibv_blocked', 'is_interstitial', 'iframe_state', 'ads_txt_support',
-        #   'gdpr_regulation', 'timezone_offset', 'isp_type'
-        # ], errors='ignore')
+        df = df.drop(columns=[
+        'bid_ip', 'page_language', 'ssp', 'publisher_id', 'creative_id',
+        'mobile_screen_size', 'historical_viewability','advertiser_id', 'creative_size',
+        'ua_os_version', 'ua_browser_version', 'ua_browser', 'ua_os', 'ua_device_type',
+        'ua_third_party_cookie', 'user_status', 'content_category', 'carrier_id',
+        'full_placement_id', 'city', 'zip_code', 'user_segments', 'search_terms',
+        'city_count',
+        'user_id', 'accept_language'
+        'timezone_offset', 'zip_code'], errors='ignore')
+
 
 
         return df

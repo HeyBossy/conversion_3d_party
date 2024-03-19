@@ -43,26 +43,25 @@ def run():
     feature_transformer.fit(X_train)
     X_train = feature_transformer.transform(X_train)
     X_test = feature_transformer.transform(X_test)
-    X_train.value_counts('ads_txt_support')
-    # cat_features = list(X_train.columns[X_train.dtypes == 'object'])
-    # num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
-    cat_features = [
-        'bid_isp_name', 'tag_id', 'creative_type', 'visibility', 'model',
-        'is_https', 'ibv_blocked', 'is_interstitial', 'mime_types', 'content_tags',
-        'iframe_state', 'ads_txt_support', 'gdpr_regulation', 'do_not_track',
-        'user_fraud_state', 'is_mobile_optimized_site', 'utm_source', 'search_engine',
-        'region_code', 'isp_type', 'user_detection_type', 'ud_cookie_ts', 'accept_encoding',
-        'accept_language', 'ua_parsing_type', 'ua_type', 'processed_ua_browser',
-        'processed_page_language', 'processed_creative_size', 'processed_mobile_screen_size',
-        'landing_page_domain', 'bid_url_domain', 'bid_referer_domain', 'category_city',
-        'processed_search_terms'
-    ]
+    cat_features = list(X_train.columns[X_train.dtypes == 'object'])
+    num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
+     #cat_features = [
+     #    'tag_id',  'visibility',
+     #   'is_https',  'mime_types', 'content_tags',
+     #   'iframe_state', 'ads_txt_support', 'gdpr_regulation', 'do_not_track',
+     #   'is_mobile_optimized_site', 'utm_source', 'search_engine',
+     #    'isp_type', 'user_detection_type', 'ud_cookie_ts', 'accept_encoding',
+     #     'ua_type', 'processed_ua_browser',
+     #   'processed_page_language', 'processed_creative_size',
+     #   'landing_page_domain',
+    #    'processed_search_terms',
+    #]
 
-    num_features = [
-        'floor_cpm', 'screen_pixel_ratio', 'processed_hour_of_day', 'processed_day_of_week',
-        'processed_mobile_screen_sizew', 'processed_mobile_screen_sizeh',
-        '3d_userid_freq', '3d_good_conv_freq'
-    ]
+   # num_features = [
+     #   'floor_cpm', 'processed_hour_of_day', 'processed_day_of_week',
+     #   'processed_mobile_screen_sizew', 'processed_mobile_screen_sizeh',
+     #   '3d_userid_freq', '3d_good_conv_freq', 'region_code'
+    #]
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
@@ -86,7 +85,7 @@ def run():
 
     feature_importances = cb_clf.get_feature_importance(prettified=True)
 
-    #print(f'Важность признаков  {feature_importances}')
+    print(f'Важность признаков  {feature_importances}')
     predictions = cb_clf.predict_proba(X_test)[:, 1]
 
     print("Save model..")
