@@ -41,10 +41,10 @@ def run():
     X_test = df[(df.time >= split_date)]
     y_test = df.label[(df.time >= split_date)]
 
-    feature_transformer = FeatureTransformer()
-    feature_transformer.fit(X_train)
-    X_train = feature_transformer.transform(X_train)
-    X_test = feature_transformer.transform(X_test)
+    #feature_transformer = FeatureTransformer()
+    #feature_transformer.fit(X_train)
+    #X_train = feature_transformer.transform(X_train)
+    #X_test = feature_transformer.transform(X_test)
 
     cat_features = list(X_train.columns[X_train.dtypes == 'object'])
     num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
