@@ -46,7 +46,7 @@ class FeatureTransformer:
         'city_count',
         'user_id', 'accept_language'
         'timezone_offset', 'zip_code'
-        'is_interstitial', 'iframe_state', 'is_https', 'ua_parsing_type', 'ua_type', 'device_screen', 'isp_type'], errors='ignore')
+        'is_interstitial', 'iframe_state', 'is_https',  'device_screen', 'isp_type'], errors='ignore')
 
 
 
