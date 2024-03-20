@@ -75,7 +75,7 @@ def run():
 
 def make_pedictions(test_df_path):
     val_df = pd.read_parquet(test_df_path)
-    val_df.drop('time', inplace=True, axis=1)
+    val_df.drop(['time', 'user_id'], inplace=True, axis=1)
     cat_features = list(val_df.columns[val_df.dtypes == 'object'])
     num_features = list(val_df.columns[~(val_df.dtypes == 'object')])
     val_df = pd.concat((val_df[cat_features].fillna('-1'), val_df[num_features].fillna(-1)), axis=1)
