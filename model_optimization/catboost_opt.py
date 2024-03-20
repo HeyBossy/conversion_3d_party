@@ -2,7 +2,7 @@ import optuna
 import catboost as cb
 from sklearn.metrics import roc_auc_score
 import json
-import pandas as pd
+
 
 class ModelOptimizer:
     def __init__(self, X_train, y_train, X_test, y_test, cat_features, save_path):
@@ -46,23 +46,22 @@ class ModelOptimizer:
                 json.dump(param, f)
 
         return auc
-# Функция для сохранения результатов в JSON и CSV
+        
     def save_results(self):
-        # Сохраняем результаты в JSON
-        with open('all_model_params.json', 'w') as f:
-            json.dump(self.auc_results, f)
+            # Сохраняем результаты в JSON
+            with open('all_model_params.json', 'w') as f:
+                json.dump(self.auc_results, f)
 
-        # Конвертируем в DataFrame и сохраняем в CSV
-        df = pd.DataFrame(self.auc_results)
-        df_sorted = df.sort_values(by='auc', ascending=False)  # Сортировка по AUC
-        df_sorted.to_csv('all_model_params.csv', index=False)
-
+            # Конвертируем в DataFrame и сохраняем в CSV
+            df = pd.DataFrame(self.auc_results)
+            df_sorted = df.sort_values(by='auc', ascending=False)  # Сортировка по AUC
+            df_sorted.to_csv('all_model_params.csv', index=False)
 
 def optimize_model(X_train, y_train, X_test, y_test, cat_features, save_path):
     optimizer = ModelOptimizer(X_train, y_train, X_test, y_test, cat_features, save_path)
     study = optuna.create_study(direction='maximize')
     study.optimize(optimizer.objective, n_trials=100)
-
+    
     # Сохраняем все результаты после оптимизации
     optimizer.save_results()
 
