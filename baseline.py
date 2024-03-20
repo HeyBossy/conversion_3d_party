@@ -1,9 +1,11 @@
 import pandas as pd
 import catboost as cb
 from features.transforms import FeatureTransformer
+from catboost import CatBoostRegressor, EShapCalcType, EFeaturesSelectionAlgorithm
 
 import optuna
 import catboost as cb
+import pickle
 from sklearn.metrics import roc_auc_score
 
 from model_optimization.catboost_opt import optimize_model
@@ -22,7 +24,16 @@ MODEL_PATH = 'trained_model.cb'
 
 feature_transformer = FeatureTransformer()
 
-
+selected_features = ['accept_encoding',
+                     'processed_mobile_screen_size',
+                     'landing_page_domain',
+                     'bid_referer_domain',
+                     'creative_type',
+                     'floor_cpm',
+                     'is_interstitial',
+                     'gdpr_regulation',
+                     'user_fraud_state',
+                     'processed_bid_isp_name']
 def run():
     # Some datasets are quite big. All together they take ~ 15Gb RAM
     train_views = pd.read_parquet(VIEWS_PATH)
@@ -51,38 +62,37 @@ def run():
     feature_transformer.fit(X_train)
     X_train = feature_transformer.transform(X_train)
     X_test = feature_transformer.transform(X_test)
+
+
+
+    X_train = X_train[selected_features]
+    X_test = X_test[selected_features]
+
     cat_features = list(X_train.columns[X_train.dtypes == 'object'])
-    print('cat_features', cat_features)
     num_features = list(X_train.columns[~(X_train.dtypes == 'object')])
-    print('num_features', num_features)
 
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
+    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC", early_stopping_rounds=20)
 
-    #    optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
-
-    #    cb_clf = cb.CatBoostClassifier(cat_features=cat_features, eval_metric="AUC",
-    #    early_stopping_rounds=20)
-
-    cb_clf = cb.CatBoostClassifier(
-        cat_features=cat_features,
-        eval_metric="AUC",
-        early_stopping_rounds=20,
-        depth=6,  # Обновленный параметр
-        l2_leaf_reg=7.482059679856143,  # Обновленный параметр
-        border_count=53,
-        grow_policy='Depthwise',
-        learning_rate=0.2080395733274946,
-        subsample=0.49804575140321844,
-    )
+    # rfe_dict = cb_clf.select_features(X=X_train,
+    #                                   y=y_train,
+    #                                   eval_set=(X_test, y_test),
+    #                                   features_for_select=f'0-{len(X_train.columns) - 1}',
+    #                                   num_features_to_select=10,  # Number of features to keep from the selected
+    #                                   steps=10,  # Number of model iterations performed in the RFE
+    #                                   verbose=50,  #
+    #                                   train_final_model=True,  # Train final model after RFE is finished
+    #                                   plot=False,
+    #                                   algorithm=EFeaturesSelectionAlgorithm.RecursiveByShapValues,
+    #                                   shap_calc_type=EShapCalcType.Regular
+    #                                   )
+    #
+    # with open("EShapCalcType_rfe_dict.pkl", 'wb') as f:
+    #     pickle.dump(rfe_dict, f)
 
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
-    feature_importances = cb_clf.get_feature_importance(prettified=True)
-
-
-
-    print(f'Важность признаков  {feature_importances}')
     predictions = cb_clf.predict_proba(X_test)[:, 1]
 
     print("Save model..")
@@ -93,6 +103,8 @@ def run():
 def make_pedictions(test_df_path):
     val_df = pd.read_parquet(test_df_path)
     val_df = feature_transformer.transform(val_df)
+
+    val_df = val_df[selected_features]
     cat_features = list(val_df.columns[val_df.dtypes == 'object'])
     num_features = list(val_df.columns[~(val_df.dtypes == 'object')])
     val_df = pd.concat((val_df[cat_features].fillna('-1'), val_df[num_features].fillna(-1)), axis=1)
