@@ -55,7 +55,15 @@ def run():
     # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
     cb_clf = cb.CatBoostClassifier(iterations=100, cat_features=cat_features, eval_metric="AUC",
-                                   early_stopping_rounds=20)
+                                   early_stopping_rounds=20,
+                                   learning_rate=0.0183832802841483,
+                                   l2_leaf_reg=4.24348355935796,
+                                   subsample=0.46645667943978464,
+                                   depth=7,
+                                   border_count=179,
+                                   grow_policy='SymmetricTree',
+                                   random_seed=42
+                                   )
     cb_clf.fit(X_train, y_train, eval_set=(X_test, y_test))
 
     predictions = cb_clf.predict_proba(X_test)[:, 1]
