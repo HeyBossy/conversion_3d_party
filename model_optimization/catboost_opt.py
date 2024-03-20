@@ -2,6 +2,7 @@ import optuna
 import catboost as cb
 from sklearn.metrics import roc_auc_score
 import json
+import pandas as pd
 
 
 class ModelOptimizer:
@@ -14,6 +15,7 @@ class ModelOptimizer:
         self.X_test = X_test
         self.y_test = y_test
         self.cat_features = cat_features
+        self.auc_results = []  # Список для хранения результатов и параметров
 
     def objective(self, trial):
         param = {
@@ -32,11 +34,15 @@ class ModelOptimizer:
         if param['grow_policy'] == 'Lossguide':
             param['max_leaves'] = trial.suggest_int('max_leaves', 31, 64)
 
-        model = cb.CatBoostClassifier(**param, verbose=1)
-        model.fit(self.X_train, self.y_train, eval_set=[(self.X_test, self.y_test)], cat_features=self.cat_features, early_stopping_rounds=20, verbose=1)
+        model = cb.CatBoostClassifier(**param)
+        model.fit(self.X_train, self.y_train, eval_set=[(self.X_test, self.y_test)], cat_features=self.cat_features,
+                  early_stopping_rounds=20)
 
         preds = model.predict_proba(self.X_test)[:, 1]
         auc = roc_auc_score(self.y_test, preds)
+
+        # Записываем результаты и параметры в список
+        self.auc_results.append({'auc': auc, **param})
 
         if auc > self.best_auc:
             self.best_auc = auc
@@ -46,23 +52,27 @@ class ModelOptimizer:
                 json.dump(param, f)
 
         return auc
-        
-    def save_results(self):
-            # Сохраняем результаты в JSON
-            with open('all_model_params.json', 'w') as f:
-                json.dump(self.auc_results, f)
 
-            # Конвертируем в DataFrame и сохраняем в CSV
-            df = pd.DataFrame(self.auc_results)
-            df_sorted = df.sort_values(by='auc', ascending=False)  # Сортировка по AUC
-            df_sorted.to_csv('all_model_params.csv', index=False)
+    def save_results(self):
+        # Сохраняем результаты в JSON
+        with open('all_model_params.json', 'w') as f:
+            json.dump(self.auc_results, f)
+
+        # Конвертируем в DataFrame и сохраняем в CSV
+        df = pd.DataFrame(self.auc_results)
+        df_sorted = df.sort_values(by='auc', ascending=False)  # Сортировка по AUC
+        df_sorted.to_csv('all_model_params.csv', index=False)
+
 
 def optimize_model(X_train, y_train, X_test, y_test, cat_features, save_path):
     optimizer = ModelOptimizer(X_train, y_train, X_test, y_test, cat_features, save_path)
     study = optuna.create_study(direction='maximize')
     study.optimize(optimizer.objective, n_trials=100)
-    
+
     # Сохраняем все результаты после оптимизации
     optimizer.save_results()
 
     print('Лучшие параметры: ', study.best_params)
+
+# Далее производится вызов функции optimize_model со всеми необходимыми аргументами
+# optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)

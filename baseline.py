@@ -52,7 +52,7 @@ def run():
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
 
-    optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
+    # optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
     cb_clf = cb.CatBoostClassifier(iterations=100, cat_features=cat_features, eval_metric="AUC",
                                    early_stopping_rounds=20)
