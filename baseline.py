@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import catboost as cb
-from features.transforms import FeatureTransformer
-
+#from features.transforms import FeatureTransformer
+from model_optimization.catboost_opt import optimize_model
 #######################
 #
 # This is a (very) simple solution to the classification problem of
@@ -36,10 +36,10 @@ def run():
     df.drop('is_post_click', inplace=True, axis=1)
 
     split_date = '2024-01-17'
-    X_train = df[(df.time < split_date)]
+    X_train = df[(df.time < split_date)].drop(['time', 'label', 'user_id'], axis=1)
     y_train = df.label[(df.time < split_date)]
-    X_test = df[(df.time >= split_date)]
-    y_test = df.label[(df.time >= split_date)]
+    X_test = df[(df.time > split_date)].drop(['time', 'label', 'user_id'], axis=1)
+    y_test = df.label[(df.time > split_date)]
 
     #feature_transformer = FeatureTransformer()
     #feature_transformer.fit(X_train)
@@ -51,6 +51,8 @@ def run():
 
     X_train = pd.concat((X_train[cat_features].fillna('-1'), X_train[num_features].fillna(-1)), axis=1)
     X_test = pd.concat((X_test[cat_features].fillna('-1'), X_test[num_features].fillna(-1)), axis=1)
+
+    optimize_model(X_train, y_train, X_test, y_test, cat_features, MODEL_PATH)
 
     cb_clf = cb.CatBoostClassifier(iterations=100, cat_features=cat_features, eval_metric="AUC",
                                    early_stopping_rounds=20)
