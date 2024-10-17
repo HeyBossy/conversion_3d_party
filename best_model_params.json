@@ -1,1 +1,3 @@
-{"objective": "Logloss", "eval_metric": "AUC", "random_seed": 42, "learning_rate": 0.2888162545664902, "l2_leaf_reg": 4.75448136598821, "subsample": 0.551052756511186, "depth": 10, "border_count": 66, "grow_policy": "SymmetricTree", "iterations": 100}
+version https://git-lfs.github.com/spec/v1
+oid sha256:1fd59558dd931ec02f952698cd782e675d31dc7e4b6f8b43145d4a094eb7408b
+size 251
